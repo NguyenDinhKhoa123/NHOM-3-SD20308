@@ -5,20 +5,16 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public class JPAUtil {
+    private static final String PU_NAME = "PolyCafePU";
+    private static final EntityManagerFactory emf = buildFactory();
 
-    private static final String PERSISTENCE_UNIT_NAME = "PolyCafePU";
-
-    private static final EntityManagerFactory emf = buildEntityManagerFactory();
-
-    private static EntityManagerFactory buildEntityManagerFactory() {
+    private static EntityManagerFactory buildFactory() {
         try {
-            EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-            System.out.println("Kết nối database thành công!");
-            return factory;
+            // Nếu dòng này lỗi, nó sẽ tự văng Exception vào khối catch
+            return Persistence.createEntityManagerFactory(PU_NAME);
         } catch (Exception e) {
-            System.err.println("Kết nối database thất bại!");
-            e.printStackTrace();
-            throw new RuntimeException(e);
+
+            throw new RuntimeException("Lỗi khởi tạo JPA: " + e.getMessage(), e);
         }
     }
 
@@ -29,7 +25,6 @@ public class JPAUtil {
     public static void shutdown() {
         if (emf != null && emf.isOpen()) {
             emf.close();
-            System.out.println("Đã đóng kết nối database.");
         }
     }
 }
