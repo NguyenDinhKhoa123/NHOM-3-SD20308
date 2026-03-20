@@ -1,0 +1,9 @@
+package poly.cafe.dao;
+
+import poly.cafe.entity.Drink;
+import java.util.List;
+
+public interface DrinkDAO extends GenericDAO<Drink, Long> {
+
+    List<Drink> findByCategory(Long categoryId);
+}
