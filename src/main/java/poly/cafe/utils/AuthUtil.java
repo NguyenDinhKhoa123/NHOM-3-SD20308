@@ -30,15 +30,25 @@ public class AuthUtil {
     }
 
     /**
-     * Kiểm tra xem người dùng có phải là Manager (hoặc Admin) không
-     * Giả sử thuộc tính role trong User quyết định quyền hạn
+     * Kiểm tra xem người dùng có phải là Admin (Quản trị viên) không
      */
-    public static boolean isManager(HttpServletRequest request) {
+    public static boolean isAdmin(HttpServletRequest request) {
+        User user = getUser(request);
+        if (user != null) {
+            return user.getRole().toLowerCase().equals("admin");
+        }
+        return false;
+    }
+
+    /**
+     * Kiểm tra xem người dùng có quyền Staff (Nhân viên) không.
+     * Lưu ý: Admin cũng được coi là có quyền của Staff để duyệt đơn.
+     */
+    public static boolean isStaff(HttpServletRequest request) {
         User user = getUser(request);
         if (user != null) {
             String role = user.getRole().toLowerCase();
-            // Tùy vào CSDL của bạn, ở đây check "admin" hoặc "manager"
-            return role.equals("admin") || role.equals("manager");
+            return role.equals("staff") || role.equals("admin");
         }
         return false;
     }
@@ -49,6 +59,5 @@ public class AuthUtil {
     public static void clear(HttpServletRequest request) {
         HttpSession session = request.getSession();
         session.removeAttribute("user");
-        // Hoặc session.invalidate() để xóa toàn bộ session
     }
 }

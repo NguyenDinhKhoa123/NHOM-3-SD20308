@@ -27,4 +27,16 @@ public class DrinkDAOImpl extends GenericDAOImpl<Drink, Long> implements DrinkDA
             em.close();
         }
     }
+    @Override
+    public List<Drink> searchByName(String keyword) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            String jpql = "SELECT d FROM Drink d WHERE LOWER(d.name) LIKE LOWER(:keyword)";
+            TypedQuery<Drink> query = em.createQuery(jpql, Drink.class);
+            query.setParameter("keyword", "%" + keyword + "%");
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
 }

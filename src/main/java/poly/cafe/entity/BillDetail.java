@@ -3,21 +3,17 @@ package poly.cafe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
-@Table(name = "bill_details")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@ToString
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Entity @Table(name = "bill_details")
 public class BillDetail {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Integer quantity;
+
+    // Đồng bộ với DECIMAL(10,2) trong SQL
+    @Column(name = "price")
     private Double price;
 
     @ManyToOne
@@ -27,5 +23,4 @@ public class BillDetail {
     @ManyToOne
     @JoinColumn(name = "drink_id")
     private Drink drink;
-
 }

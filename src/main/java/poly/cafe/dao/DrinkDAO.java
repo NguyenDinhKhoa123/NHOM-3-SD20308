@@ -6,4 +6,6 @@ import java.util.List;
 public interface DrinkDAO extends GenericDAO<Drink, Long> {
 
     List<Drink> findByCategory(Long categoryId);
+
+    List<Drink> searchByName(String keyword);
 }

@@ -1,33 +1,34 @@
 package poly.cafe.dao.impl;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+import poly.cafe.dao.GenericDAO;
 import poly.cafe.utils.JPAUtil;
-
 import java.util.List;
 
-public class GenericDAOImpl<T, ID> {
-
-    private Class<T> entityClass;
+public class GenericDAOImpl<T, ID> implements GenericDAO<T, ID> {
+    protected Class<T> entityClass;
 
     public GenericDAOImpl(Class<T> entityClass) {
         this.entityClass = entityClass;
     }
 
-    public void create(T entity) {
+    @Override
+    public T create(T entity) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             em.getTransaction().begin();
             em.persist(entity);
             em.getTransaction().commit();
+            return entity; // Trả về entity đã có ID
         } catch (Exception e) {
             em.getTransaction().rollback();
-            throw new RuntimeException("Create error", e);
+            throw e;
         } finally {
             em.close();
         }
     }
 
+    @Override
     public void update(T entity) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
@@ -36,12 +37,13 @@ public class GenericDAOImpl<T, ID> {
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
-            throw new RuntimeException("Update error", e);
+            throw e;
         } finally {
             em.close();
         }
     }
 
+    @Override
     public void delete(ID id) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
@@ -53,12 +55,13 @@ public class GenericDAOImpl<T, ID> {
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
-            throw new RuntimeException("Delete error", e);
+            throw e;
         } finally {
             em.close();
         }
     }
 
+    @Override
     public T findById(ID id) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
@@ -68,12 +71,12 @@ public class GenericDAOImpl<T, ID> {
         }
     }
 
+    @Override
     public List<T> findAll() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             String jpql = "SELECT e FROM " + entityClass.getSimpleName() + " e";
-            TypedQuery<T> query = em.createQuery(jpql, entityClass);
-            return query.getResultList();
+            return em.createQuery(jpql, entityClass).getResultList();
         } finally {
             em.close();
         }

@@ -1,24 +1,18 @@
 package poly.cafe.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
-@Entity
-@Table(name = "category")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@ToString
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Entity @Table(name = "category")
 public class Category {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-    private Boolean active;
+    private Boolean active = true;
 
+    @OneToMany(mappedBy = "category")
+    private List<Drink> drinks;
 }

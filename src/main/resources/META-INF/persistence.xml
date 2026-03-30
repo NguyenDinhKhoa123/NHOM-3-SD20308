@@ -1,47 +1,23 @@
-<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
-             version="3.0">
-
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
     <persistence-unit name="PolyCafePU">
-
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <!-- ENTITY -->
         <class>poly.cafe.entity.User</class>
-        <class>poly.cafe.entity.Card</class>
         <class>poly.cafe.entity.Category</class>
         <class>poly.cafe.entity.Drink</class>
         <class>poly.cafe.entity.Bill</class>
         <class>poly.cafe.entity.BillDetail</class>
 
         <properties>
-
-            <!-- SQL Server -->
-            <property name="jakarta.persistence.jdbc.driver"
-                      value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-
-            <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:sqlserver://localhost:1433;databaseName=PolyCafeDB;encrypt=true;trustServerCertificate=true"/>
-
+            <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PolyCafeDB;encrypt=true;trustServerCertificate=true"/>
             <property name="jakarta.persistence.jdbc.user" value="sa"/>
             <property name="jakarta.persistence.jdbc.password" value="123"/>
 
-            <!-- Hibernate -->
-            <property name="hibernate.dialect"
-                      value="org.hibernate.dialect.SQLServerDialect"/>
-
-            <!-- Debug -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
             <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
-
-            <!-- QUAN TRỌNG -->
             <property name="hibernate.hbm2ddl.auto" value="none"/>
-
-            <!-- ⚡ Tối ưu nhẹ -->
-            <property name="hibernate.jdbc.batch_size" value="20"/>
-            <property name="hibernate.order_inserts" value="true"/>
-            <property name="hibernate.order_updates" value="true"/>
-
         </properties>
-    </persistence-unit>
 
+    </persistence-unit>
 </persistence>

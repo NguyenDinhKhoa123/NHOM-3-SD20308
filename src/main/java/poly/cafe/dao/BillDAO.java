@@ -5,7 +5,12 @@ import java.util.List;
 
 public interface BillDAO extends GenericDAO<Bill, Long> {
 
-    Bill findByCard(Long cardId);
+    // Tìm các hóa đơn của một khách hàng cụ thể (để làm lịch sử mua hàng)
+    List<Bill> findByUser(Long userId);
 
-    void updateStatus(Long billId, String status);
+    // Tìm hóa đơn theo mã code (Ví dụ: BILL-ABCD)
+    Bill findByCode(String code);
+
+    double getTotalRevenue();
+    long countTotalOrders();
 }
