@@ -23,7 +23,11 @@
                      <div class="card-body">
                     <h5 class="card-title">${item.name}</h5>
                     <p class="card-text text-danger">${item.price} VNĐ</p>
-                    <a href="cart/add?id=${item.id}" class="btn btn-success w-100">Thêm vào giỏ</a>
+                    <a href="${pageContext.request.contextPath}/purchase?id=${item.id}"
+                       class="btn btn-success w-100"
+                       onclick="return confirm('Bạn muốn đặt mua món này ngay lập tức?')">
+                        Mua ngay
+                    </a>
                 </div>
             </div>
         </div>

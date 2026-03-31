@@ -21,16 +21,28 @@
             <c:set var="item" value="${entry.value}" />
             <c:set var="subtotal" value="${item.price * item.quantity}" />
             <c:set var="total" value="${total + subtotal}" />
-            <tr>
-                <img src="${pageContext.request.contextPath}/uploads/${item.image}" width="50">
-                <td>${item.name}</td>
-                <td>${item.price}</td>
-                <td>${item.quantity}</td>
-                <td>${subtotal}</td>
-                <td>
-                    <a href="cart/remove?id=${item.id}" class="text-danger">Xóa</a>
-                </td>
-            </tr>
+<%-- Sửa lại đoạn này trong vòng lặp c:forEach --%>
+<tr>
+    <td>
+        <img src="${pageContext.request.contextPath}/uploads/${item.image}" width="50" class="img-thumbnail">
+    </td>
+    <td class="fw-bold">${item.name}</td>
+    <td><fmt:formatNumber value="${item.price}" type="number"/> VNĐ</td>
+    <td>
+        <%-- Nên thêm input để sau này làm chức năng cập nhật số lượng --%>
+        <input type="number" value="${item.quantity}" style="width: 60px" class="form-control d-inline">
+    </td>
+    <td class="text-danger fw-bold">
+        <fmt:formatNumber value="${subtotal}" type="number"/> VNĐ
+    </td>
+    <td>
+        <a href="${pageContext.request.contextPath}/cart/remove?id=${item.id}"
+           class="btn btn-sm btn-outline-danger"
+           onclick="return confirm('Xóa món này khỏi giỏ hàng?')">
+           <i class="bi bi-trash"></i> Xóa
+        </a>
+    </td>
+</tr>
         </c:forEach>
     </tbody>
 </table>

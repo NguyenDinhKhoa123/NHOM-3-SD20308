@@ -31,14 +31,18 @@ public class LoginServlet extends HttpServlet {
         User user = userService.login(email, pass);
 
         if (user != null) {
-            // Lưu vào session
             AuthUtil.setUser(req, user);
-
-            // Phân quyền chuyển hướng
             String role = user.getRole().toLowerCase();
-            if (role.equals("admin") || role.equals("staff")) {
+
+            // TÁCH RIÊNG ĐƯỜNG ĐI (Sửa lỗi 403 cho Staff)
+            if (role.equals("admin")) {
+                // Admin thì mới được vào Dashboard
                 resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
+            } else if (role.equals("staff")) {
+                // Nhân viên thì đẩy thẳng sang trang Quản lý đơn hàng
+                resp.sendRedirect(req.getContextPath() + "/admin/orders");
             } else {
+                // Khách hàng về trang chủ
                 resp.sendRedirect(req.getContextPath() + "/home");
             }
         } else {

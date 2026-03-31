@@ -23,7 +23,7 @@ public class CartServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
         HttpSession session = req.getSession();
-
+        String path = req.getServletPath();
         // Lấy giỏ hàng từ session, nếu chưa có thì tạo mới
         Map<Long, CartItem> cart = (Map<Long, CartItem>) session.getAttribute("cart");
         if (cart == null) {
@@ -51,6 +51,15 @@ public class CartServlet extends HttpServlet {
             return;
         }
 
+        if (path.contains("/cart/add")) {
+            // ... code thêm vào giỏ ...
+            resp.sendRedirect(req.getContextPath() + "/drinks?message=added");
+            return;
+        } else if (path.contains("/cart/remove")) {
+            // ... code xóa món ...
+            resp.sendRedirect(req.getContextPath() + "/cart");
+            return;
+        }
         // Hiển thị trang giỏ hàng
         req.setAttribute("view", "/views/site/cart.jsp");
         req.getRequestDispatcher("/views/layout.jsp").forward(req, resp);

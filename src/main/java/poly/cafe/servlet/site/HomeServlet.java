@@ -7,15 +7,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet({"/", "/home"})
+@WebServlet(urlPatterns = {"/home", "/", ""})
 public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Trang chủ có thể chưa cần load dữ liệu phức tạp
+        // Đặt tiêu đề hoặc dữ liệu cần thiết cho trang chủ
         req.setAttribute("message", "Chào mừng đến với PolyCafe!");
 
-        // Đặt trang con là home.jsp để layout.jsp include vào
+        // Khai báo view để layout.jsp thực hiện include
         req.setAttribute("view", "/views/site/home.jsp");
+
+        // Forward sang layout chính
         req.getRequestDispatcher("/views/layout.jsp").forward(req, resp);
     }
 }

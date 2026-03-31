@@ -1,54 +1,48 @@
 package poly.cafe.filter;
 
-import java.io.IOException;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
-import jakarta.servlet.http.HttpFilter; // Tomcat 10 hỗ trợ rất tốt class này
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import poly.cafe.entity.User;
+import poly.cafe.utils.AuthUtil;
+import java.io.IOException;
 
-// Chỉ chặn các URL cần bảo mật
-@WebFilter(filterName = "AuthFilter", urlPatterns = {"/admin/*", "/staff/*", "/profile/*"})
-public class AuthFilter extends HttpFilter {
-
+@WebFilter("/*")
+public class AuthFilter implements Filter {
     @Override
-    protected void doFilter(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
-
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-
-        // 1. Kiểm tra Session
-        HttpSession session = req.getSession();
-        User user = (User) session.getAttribute("user");
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
         String uri = req.getRequestURI();
+        String contextPath = req.getContextPath();
 
-        // 2. Chặn nếu chưa đăng nhập (Authentication)
-        if (user == null) {
-            // Chuyển hướng về trang login kèm thông báo
-            resp.sendRedirect(req.getContextPath() + "/login?error=unauthorized");
+        // 1. Vùng xanh: Không cần đăng nhập
+        if (uri.equals(contextPath + "/") || uri.contains("/home") || uri.contains("/login") ||
+                uri.contains("/drinks") || uri.contains("/assets") || uri.contains("/images")) {
+            chain.doFilter(request, response);
             return;
         }
 
-        // 3. Kiểm tra quyền hạn (Authorization)
-        String role = user.getRole().toLowerCase(); // admin, staff, customer
-        boolean isAuthorized = true;
-
-        if (uri.contains("/admin/") && !role.equals("admin")) {
-            isAuthorized = false;
-        }
-        else if (uri.contains("/staff/") && !(role.equals("staff") || role.equals("admin"))) {
-            // Admin có quyền vào cả trang của Staff
-            isAuthorized = false;
+        // 2. Vùng đỏ: Bắt buộc đăng nhập (Khách, Nhân viên, Admin)
+        if (uri.contains("/admin") || uri.contains("/my-orders") || uri.contains("/purchase")) {
+            if (!AuthUtil.isAuthenticated(req)) {
+                resp.sendRedirect(contextPath + "/login");
+                return;
+            }
         }
 
-        // 4. Xử lý kết quả
-        if (!isAuthorized) {
-            // Trả về lỗi 403 (Forbidden) nếu không đủ quyền
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Ban khong co quyen truy cap khu vuc nay!");
-        } else {
-            // Hợp lệ cho đi tiếp
-            chain.doFilter(req, resp);
+        // 3. Phân quyền chi tiết (Giải quyết lỗi 10 & 11)
+        // Những trang CHỈ dành cho Admin
+        if (uri.contains("/admin/dashboard") || uri.contains("/admin/drinks")) {
+            if (!AuthUtil.isAdmin(req)) {
+                // Nếu là STAFF thì đá về trang quản lý đơn hàng hoặc báo lỗi
+                resp.sendError(403, "Bạn không có quyền truy cập khu vực Dashboard/Quản lý món!");
+                return;
+            }
         }
+
+        // Mặc định: Cho phép đi tiếp (Ví dụ: Staff vào /admin/orders sẽ OK)
+        chain.doFilter(request, response);
     }
 }

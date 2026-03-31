@@ -87,8 +87,11 @@
                                         <td>
                                             <c:choose>
                                                 <c:when test="${not empty d.image}">
-                                                    <img src="${pageContext.request.contextPath}/uploads/${d.image}" width="60">
-                                                         class="rounded shadow-sm" width="60" height="50" style="object-fit: cover;">
+                                                    <img src="${pageContext.request.contextPath}/images/${d.image}"
+                                                         class="rounded shadow-sm"
+                                                         width="60"
+                                                         height="50"
+                                                         style="object-fit: cover;">
                                                 </c:when>
                                                 <c:otherwise>
                                                     <img src="${pageContext.request.contextPath}/assets/img/no-image.png"
