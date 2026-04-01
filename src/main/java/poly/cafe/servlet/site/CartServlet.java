@@ -10,21 +10,22 @@ import poly.cafe.entity.Drink;
 import poly.cafe.model.CartItem;
 import poly.cafe.service.DrinkService;
 import poly.cafe.service.impl.DrinkServiceImpl;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @WebServlet({"/cart", "/cart/add", "/cart/remove", "/cart/update"})
 public class CartServlet extends HttpServlet {
-    private DrinkService drinkService = new DrinkServiceImpl();
+
+    private final DrinkService drinkService = new DrinkServiceImpl();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String uri = req.getRequestURI();
+    @SuppressWarnings("unchecked")
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         HttpSession session = req.getSession();
-        String path = req.getServletPath();
-        // Lấy giỏ hàng từ session, nếu chưa có thì tạo mới
+        String uri = req.getRequestURI();
+
         Map<Long, CartItem> cart = (Map<Long, CartItem>) session.getAttribute("cart");
         if (cart == null) {
             cart = new HashMap<>();
@@ -34,33 +35,21 @@ public class CartServlet extends HttpServlet {
         if (uri.contains("add")) {
             Long id = Long.parseLong(req.getParameter("id"));
             if (cart.containsKey(id)) {
-                CartItem item = cart.get(id);
-                item.setQuantity(item.getQuantity() + 1);
+                cart.get(id).setQuantity(cart.get(id).getQuantity() + 1);
             } else {
                 Drink d = drinkService.findById(id);
                 cart.put(id, new CartItem(d.getId(), d.getName(), d.getPrice(), 1, d.getImage()));
             }
-            resp.sendRedirect(req.getContextPath() + "/drinks"); // Thêm xong quay lại menu
+            resp.sendRedirect(req.getContextPath() + "/drinks");
             return;
         }
 
         if (uri.contains("remove")) {
-            Long id = Long.parseLong(req.getParameter("id"));
-            cart.remove(id);
+            cart.remove(Long.parseLong(req.getParameter("id")));
             resp.sendRedirect(req.getContextPath() + "/cart");
             return;
         }
 
-        if (path.contains("/cart/add")) {
-            // ... code thêm vào giỏ ...
-            resp.sendRedirect(req.getContextPath() + "/drinks?message=added");
-            return;
-        } else if (path.contains("/cart/remove")) {
-            // ... code xóa món ...
-            resp.sendRedirect(req.getContextPath() + "/cart");
-            return;
-        }
-        // Hiển thị trang giỏ hàng
         req.setAttribute("view", "/views/site/cart.jsp");
         req.getRequestDispatcher("/views/layout.jsp").forward(req, resp);
     }

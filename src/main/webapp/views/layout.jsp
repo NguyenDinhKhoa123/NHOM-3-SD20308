@@ -9,8 +9,32 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; }
-        .main-content { min-height: 70vh; } /* Giúp footer luôn nằm dưới cùng */
+        :root {
+            --pc-green:        #27ae60;
+            --pc-green-dark:   #219150;
+            --pc-green-light:  #eafaf1;
+            --pc-mint:         #2ecc71;
+            --pc-red:          #e74c3c;
+            --pc-orange:       #f39c12;
+            --pc-bg:           #f8f9fa;
+            --pc-white:        #ffffff;
+            --pc-border:       #dee2e6;
+            --pc-text:         #2c3e50;
+            --pc-muted:        #7f8c8d;
+        }
+        body { background-color: var(--pc-bg); color: var(--pc-text); }
+        .main-content { min-height: 70vh; }
+        .btn-primary {
+            background-color: var(--pc-green);
+            border-color: var(--pc-green);
+        }
+        .btn-primary:hover {
+            background-color: var(--pc-green-dark);
+            border-color: var(--pc-green-dark);
+        }
+        .text-primary { color: var(--pc-green) !important; }
+        a { color: var(--pc-green); }
+        a:hover { color: var(--pc-green-dark); }
     </style>
 </head>
 <body>
@@ -24,5 +48,6 @@
     </div>
 
     <jsp:include page="/views/common/footer.jsp"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

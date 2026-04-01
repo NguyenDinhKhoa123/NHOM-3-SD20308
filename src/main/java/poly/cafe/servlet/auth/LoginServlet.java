@@ -1,4 +1,4 @@
-package poly.cafe.servlet.auth; // Cập nhật package
+package poly.cafe.servlet.auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -9,40 +9,36 @@ import poly.cafe.entity.User;
 import poly.cafe.service.UserService;
 import poly.cafe.service.impl.UserServiceImpl;
 import poly.cafe.utils.AuthUtil;
-
 import java.io.IOException;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
-    private UserService userService = new UserServiceImpl();
+
+    private final UserService userService = new UserServiceImpl();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Sử dụng cơ chế layout.jsp để hiển thị trang login
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         req.setAttribute("view", "/views/auth/login.jsp");
         req.getRequestDispatcher("/views/layout.jsp").forward(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         String email = req.getParameter("email");
         String pass = req.getParameter("password");
-
         User user = userService.login(email, pass);
 
         if (user != null) {
             AuthUtil.setUser(req, user);
             String role = user.getRole().toLowerCase();
 
-            // TÁCH RIÊNG ĐƯỜNG ĐI (Sửa lỗi 403 cho Staff)
             if (role.equals("admin")) {
-                // Admin thì mới được vào Dashboard
                 resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
             } else if (role.equals("staff")) {
-                // Nhân viên thì đẩy thẳng sang trang Quản lý đơn hàng
                 resp.sendRedirect(req.getContextPath() + "/admin/orders");
             } else {
-                // Khách hàng về trang chủ
                 resp.sendRedirect(req.getContextPath() + "/home");
             }
         } else {

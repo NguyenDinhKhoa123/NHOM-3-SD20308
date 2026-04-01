@@ -9,15 +9,12 @@ import java.io.IOException;
 
 @WebServlet(urlPatterns = {"/home", "/", ""})
 public class HomeServlet extends HttpServlet {
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Đặt tiêu đề hoặc dữ liệu cần thiết cho trang chủ
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         req.setAttribute("message", "Chào mừng đến với PolyCafe!");
-
-        // Khai báo view để layout.jsp thực hiện include
         req.setAttribute("view", "/views/site/home.jsp");
-
-        // Forward sang layout chính
         req.getRequestDispatcher("/views/layout.jsp").forward(req, resp);
     }
 }

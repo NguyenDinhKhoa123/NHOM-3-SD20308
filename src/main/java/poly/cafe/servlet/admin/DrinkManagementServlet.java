@@ -13,11 +13,10 @@ import poly.cafe.service.DrinkService;
 import poly.cafe.service.impl.CategoryServiceImpl;
 import poly.cafe.service.impl.DrinkServiceImpl;
 import poly.cafe.utils.FileUtil;
-
 import java.io.IOException;
 import java.util.List;
 
-@MultipartConfig // Bắt buộc phải có để upload ảnh
+@MultipartConfig
 @WebServlet({
         "/admin/drinks",
         "/admin/drinks/edit",
@@ -26,43 +25,36 @@ import java.util.List;
         "/admin/drinks/delete"
 })
 public class DrinkManagementServlet extends HttpServlet {
-    private DrinkService drinkService = new DrinkServiceImpl();
-    private CategoryService categoryService = new CategoryServiceImpl();
+
+    private final DrinkService drinkService = new DrinkServiceImpl();
+    private final CategoryService categoryService = new CategoryServiceImpl();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         String path = req.getServletPath();
 
         try {
-            // 1. XỬ LÝ NÚT "SỬA" (Đổ dữ liệu lên Form)
             if (path.contains("/edit")) {
                 Long id = Long.parseLong(req.getParameter("id"));
-                Drink drink = drinkService.findById(id);
-                req.setAttribute("drinkForm", drink);
-            }
+                req.setAttribute("drinkForm", drinkService.findById(id));
 
-            // 2. XỬ LÝ NÚT "XÓA"
-            else if (path.contains("/delete")) {
-                Long id = Long.parseLong(req.getParameter("id"));
-                drinkService.delete(id);
+            } else if (path.contains("/delete")) {
+                drinkService.delete(Long.parseLong(req.getParameter("id")));
                 resp.sendRedirect(req.getContextPath() + "/admin/drinks");
                 return;
             }
 
-            // 3. XỬ LÝ TÌM KIẾM (CHỈ TÊN & LOẠI)
-            String searchName = req.getParameter("searchName");
+            String searchName     = req.getParameter("searchName");
             String searchCateIdStr = req.getParameter("searchCategoryId");
-            Long searchCateId = (searchCateIdStr == null || searchCateIdStr.isEmpty()) ? null : Long.parseLong(searchCateIdStr);
+            Long searchCateId = (searchCateIdStr == null || searchCateIdStr.isEmpty())
+                    ? null : Long.parseLong(searchCateIdStr);
 
-            // Gọi hàm search: Truyền null cho 'active' để Admin thấy tất cả món
             List<Drink> list = drinkService.search(searchName, searchCateId, null, 1, 100);
 
-            // 4. GỬI DỮ LIỆU RA JSP
-            req.setAttribute("drinks", list);
-            req.setAttribute("categories", categoryService.findAll()); // Để nạp vào dropdown loại
-
-            // Giữ lại giá trị tìm kiếm trên ô nhập
-            req.setAttribute("searchName", searchName);
+            req.setAttribute("drinks",       list);
+            req.setAttribute("categories",   categoryService.findAll());
+            req.setAttribute("searchName",   searchName);
             req.setAttribute("searchCateId", searchCateId);
 
         } catch (Exception e) {
@@ -74,29 +66,25 @@ public class DrinkManagementServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8"); // Fix lỗi tiếng Việt
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
         try {
-            String idStr = req.getParameter("id");
-            String name = req.getParameter("name");
-            Double price = Double.parseDouble(req.getParameter("price"));
-            Long categoryId = Long.parseLong(req.getParameter("categoryId"));
-            String desc = req.getParameter("description");
-            boolean active = req.getParameter("active") != null; // Checkbox trạng thái
+            String idStr     = req.getParameter("id");
+            String name      = req.getParameter("name");
+            Double price     = Double.parseDouble(req.getParameter("price"));
+            Long categoryId  = Long.parseLong(req.getParameter("categoryId"));
+            String desc      = req.getParameter("description");
+            boolean active   = req.getParameter("active") != null;
 
-            Drink drink;
-            if (idStr == null || idStr.isEmpty()) {
-                // TẠO MỚI
-                drink = new Drink();
-                String fileName = FileUtil.save(req, "image", "uploads/drinks");
+            boolean isNew = (idStr == null || idStr.isEmpty());
+            Drink drink = isNew ? new Drink() : drinkService.findById(Long.parseLong(idStr));
+
+            String fileName = FileUtil.save(req, "image", "uploads/drinks");
+            if (isNew) {
                 drink.setImage(fileName != null ? fileName : "default.jpg");
-            } else {
-                // CẬP NHẬT
-                drink = drinkService.findById(Long.parseLong(idStr));
-                String fileName = FileUtil.save(req, "image", "uploads/drinks");
-                if (fileName != null) {
-                    drink.setImage(fileName); // Chỉ thay ảnh nếu người dùng chọn file mới
-                }
+            } else if (fileName != null) {
+                drink.setImage(fileName);
             }
 
             drink.setName(name);
@@ -108,15 +96,13 @@ public class DrinkManagementServlet extends HttpServlet {
             cat.setId(categoryId);
             drink.setCategory(cat);
 
-            if (idStr == null || idStr.isEmpty()) {
-                drinkService.create(drink);
-            } else {
-                drinkService.update(drink);
-            }
+            if (isNew) drinkService.create(drink);
+            else       drinkService.update(drink);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         resp.sendRedirect(req.getContextPath() + "/admin/drinks");
     }
 }

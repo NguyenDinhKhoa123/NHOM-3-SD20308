@@ -5,33 +5,29 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import poly.cafe.dao.BillDAO;
-import poly.cafe.dao.impl.BillDAOImpl;
 import poly.cafe.entity.Bill;
 import poly.cafe.entity.User;
 import poly.cafe.service.BillService;
 import poly.cafe.service.impl.BillServiceImpl;
 import poly.cafe.utils.AuthUtil;
-
 import java.io.IOException;
 import java.util.List;
 
 @WebServlet("/my-orders")
 public class OrderHistoryServlet extends HttpServlet {
-    // Thay vì dùng DAO, hãy dùng Service cho đồng bộ
-    private BillService billService = new BillServiceImpl();
+
+    private final BillService billService = new BillServiceImpl();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         User user = AuthUtil.getUser(req);
         if (user == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        // Gọi qua Service (đã được fix lỗi detailDAO)
         List<Bill> myOrders = billService.findByUser(user.getId());
-
         req.setAttribute("orders", myOrders);
         req.setAttribute("view", "/views/site/order-history.jsp");
         req.getRequestDispatcher("/views/layout.jsp").forward(req, resp);

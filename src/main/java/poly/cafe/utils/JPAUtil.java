@@ -5,15 +5,14 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public class JPAUtil {
+
     private static final String PU_NAME = "PolyCafePU";
     private static final EntityManagerFactory emf = buildFactory();
 
     private static EntityManagerFactory buildFactory() {
         try {
-            // Nếu dòng này lỗi, nó sẽ tự văng Exception vào khối catch
             return Persistence.createEntityManagerFactory(PU_NAME);
         } catch (Exception e) {
-
             throw new RuntimeException("Lỗi khởi tạo JPA: " + e.getMessage(), e);
         }
     }
