@@ -45,6 +45,14 @@
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Danh sách tài khoản</h5>
                 </div>
+                <form action="${pageContext.request.contextPath}/admin/users" method="get">
+                    <input type="text" name="keyword"
+                           value="${keyword}"
+                           placeholder="Tìm tên nhân viên..."
+                           style="padding:5px; width:250px;">
+                    <button type="submit"> Tìm</button>
+                </form>
+
                 <div class="card-body p-0">
                     <table class="table table-hover mb-0">
                         <thead>

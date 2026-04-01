@@ -4,9 +4,11 @@ import poly.cafe.dao.UserDAO;
 import poly.cafe.dao.impl.UserDAOImpl;
 import poly.cafe.entity.User;
 import poly.cafe.service.UserService;
+
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
+
     private UserDAO dao = new UserDAOImpl();
 
     @Override
@@ -29,8 +31,6 @@ public class UserServiceImpl implements UserService {
         return dao.findAll();
     }
 
-    // --- TRIỂN KHAI CÁC HÀM MỚI ---
-
     @Override
     public User findById(Long id) {
         return dao.findById(id);
@@ -38,12 +38,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void update(User user) {
-        // Bạn có thể thêm logic kiểm tra trước khi update ở đây
         dao.update(user);
     }
 
     @Override
     public void delete(Long id) {
         dao.delete(id);
+    }
+
+    @Override
+    public List<User> search(String keyword, String role) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return dao.findAll();
+        }
+        return dao.findByFullnameAndRole(keyword.trim(), role);
     }
 }

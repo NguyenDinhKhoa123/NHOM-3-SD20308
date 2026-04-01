@@ -10,6 +10,7 @@ import poly.cafe.service.UserService;
 import poly.cafe.service.impl.UserServiceImpl;
 import poly.cafe.utils.AuthUtil;
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet({
         "/admin/users",
@@ -23,7 +24,6 @@ public class UserManagementServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Dùng getServletPath để chính xác hơn
         String path = req.getServletPath();
 
         try {
@@ -31,9 +31,9 @@ public class UserManagementServlet extends HttpServlet {
                 Long id = Long.parseLong(req.getParameter("id"));
                 User user = userService.findById(id);
                 req.setAttribute("userForm", user);
+
             } else if (path.contains("/delete")) {
                 Long id = Long.parseLong(req.getParameter("id"));
-                // LƯU Ý: Nên dùng Soft Delete (active=false) nếu user đã có hóa đơn
                 userService.delete(id);
                 resp.sendRedirect(req.getContextPath() + "/admin/users?message=deleted");
                 return;
@@ -42,7 +42,18 @@ public class UserManagementServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        req.setAttribute("users", userService.findAll());
+
+        String keyword = req.getParameter("keyword");
+
+        // nếu bạn muốn chỉ tìm nhân viên → để "staff"
+        // nếu muốn tìm tất cả → để null
+        String role = "staff";
+
+        List<User> users = userService.search(keyword, role);
+
+        req.setAttribute("users", users);
+        req.setAttribute("keyword", keyword);
+
         req.setAttribute("view", "/views/admin/user-management.jsp");
         req.getRequestDispatcher("/views/layout.jsp").forward(req, resp);
     }
