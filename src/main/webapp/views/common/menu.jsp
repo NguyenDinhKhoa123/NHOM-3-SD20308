@@ -59,11 +59,12 @@
                     <%-- 2. CẢ ADMIN VÀ STAFF: Nghiệp vụ Đơn hàng --%>
                     <li>
                         <a class="dropdown-item py-2" href="${pageContext.request.contextPath}/admin/orders">
-                            Duyệt đơn hàng
+                            Quản lý đơn hàng
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item py-2" href="${pageContext.request.contextPath}/admin/sales-history">
+                        <%-- CHÚ Ý SỬA LẠI ĐƯỜNG LINK NÀY --%>
+                        <a class="dropdown-item py-2" href="${pageContext.request.contextPath}/admin/orders?history=true">
                             Lịch sử bán hàng
                         </a>
                     </li>

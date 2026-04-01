@@ -104,4 +104,28 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
             em.close(); // Đóng kết nối
         }
     }
+
+    @Override
+    public List<Bill> findAllPaginated(int page, int pageSize) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            String jpql = "SELECT b FROM Bill b ORDER BY b.createDate DESC";
+            TypedQuery<Bill> query = em.createQuery(jpql, Bill.class);
+            query.setFirstResult((page - 1) * pageSize); // Vị trí bắt đầu
+            query.setMaxResults(pageSize);               // Số lượng lấy ra
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public long count() {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT COUNT(b) FROM Bill b", Long.class).getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
     }

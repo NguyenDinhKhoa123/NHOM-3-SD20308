@@ -15,13 +15,13 @@ public class BillDetailDAOImpl extends GenericDAOImpl<BillDetail, Long> implemen
     }
 
     @Override
-    public List<BillDetail> findByBill(Long billId) {
+    public List<BillDetail> findByBillId(Long billId) { // Đổi tên ở đây
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            String jpql = "SELECT bd FROM BillDetail bd WHERE bd.bill.id = :bid";
+            // Nên dùng JOIN FETCH để lấy luôn thông tin Drink trong 1 lần query, tránh lỗi LazyInitialization
+            String jpql = "SELECT bd FROM BillDetail bd JOIN FETCH bd.drink WHERE bd.bill.id = :bid";
             TypedQuery<BillDetail> query = em.createQuery(jpql, BillDetail.class);
             query.setParameter("bid", billId);
-
             return query.getResultList();
         } finally {
             em.close();

@@ -15,95 +15,108 @@ import poly.cafe.service.impl.DrinkServiceImpl;
 import poly.cafe.utils.FileUtil;
 
 import java.io.IOException;
+import java.util.List;
 
-@MultipartConfig
-@WebServlet({"/admin/drinks", "/admin/drinks/create", "/admin/drinks/delete"})
+@MultipartConfig // Bắt buộc phải có để upload ảnh
+@WebServlet({
+        "/admin/drinks",
+        "/admin/drinks/edit",
+        "/admin/drinks/create",
+        "/admin/drinks/update",
+        "/admin/drinks/delete"
+})
 public class DrinkManagementServlet extends HttpServlet {
     private DrinkService drinkService = new DrinkServiceImpl();
     private CategoryService categoryService = new CategoryServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String uri = req.getRequestURI();
+        String path = req.getServletPath();
 
-        if (uri.contains("delete")) {
-            try {
+        try {
+            // 1. XỬ LÝ NÚT "SỬA" (Đổ dữ liệu lên Form)
+            if (path.contains("/edit")) {
+                Long id = Long.parseLong(req.getParameter("id"));
+                Drink drink = drinkService.findById(id);
+                req.setAttribute("drinkForm", drink);
+            }
+
+            // 2. XỬ LÝ NÚT "XÓA"
+            else if (path.contains("/delete")) {
                 Long id = Long.parseLong(req.getParameter("id"));
                 drinkService.delete(id);
-            } catch (Exception e) {
-                // Có thể thêm báo lỗi nếu không xóa được
+                resp.sendRedirect(req.getContextPath() + "/admin/drinks");
+                return;
             }
-            resp.sendRedirect(req.getContextPath() + "/admin/drinks");
-            return;
+
+            // 3. XỬ LÝ TÌM KIẾM (CHỈ TÊN & LOẠI)
+            String searchName = req.getParameter("searchName");
+            String searchCateIdStr = req.getParameter("searchCategoryId");
+            Long searchCateId = (searchCateIdStr == null || searchCateIdStr.isEmpty()) ? null : Long.parseLong(searchCateIdStr);
+
+            // Gọi hàm search: Truyền null cho 'active' để Admin thấy tất cả món
+            List<Drink> list = drinkService.search(searchName, searchCateId, null, 1, 100);
+
+            // 4. GỬI DỮ LIỆU RA JSP
+            req.setAttribute("drinks", list);
+            req.setAttribute("categories", categoryService.findAll()); // Để nạp vào dropdown loại
+
+            // Giữ lại giá trị tìm kiếm trên ô nhập
+            req.setAttribute("searchName", searchName);
+            req.setAttribute("searchCateId", searchCateId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        // Đổ dữ liệu ra trang quản lý
-        req.setAttribute("categories", categoryService.findAll());
-        req.setAttribute("drinks", drinkService.findAll());
         req.setAttribute("view", "/views/admin/drink-management.jsp");
         req.getRequestDispatcher("/views/layout.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8"); // Fix lỗi tiếng Việt
         try {
-            // 1. Đọc thông tin từ Form
+            String idStr = req.getParameter("id");
             String name = req.getParameter("name");
-            String priceStr = req.getParameter("price");
-            String categoryIdStr = req.getParameter("categoryId");
+            Double price = Double.parseDouble(req.getParameter("price"));
+            Long categoryId = Long.parseLong(req.getParameter("categoryId"));
             String desc = req.getParameter("description");
+            boolean active = req.getParameter("active") != null; // Checkbox trạng thái
 
-            // --- BẮT ĐẦU VALIDATION ---
-            if (name == null || name.trim().isEmpty()) {
-                req.setAttribute("error", "Tên món không được để trống!");
-                doGet(req, resp);
-                return;
-            }
-
-            double price = 0;
-            try {
-                price = Double.parseDouble(priceStr);
-                if (price <= 0) {
-                    req.setAttribute("error", "Giá tiền phải lớn hơn 0!");
-                    doGet(req, resp);
-                    return;
+            Drink drink;
+            if (idStr == null || idStr.isEmpty()) {
+                // TẠO MỚI
+                drink = new Drink();
+                String fileName = FileUtil.save(req, "image", "uploads/drinks");
+                drink.setImage(fileName != null ? fileName : "default.jpg");
+            } else {
+                // CẬP NHẬT
+                drink = drinkService.findById(Long.parseLong(idStr));
+                String fileName = FileUtil.save(req, "image", "uploads/drinks");
+                if (fileName != null) {
+                    drink.setImage(fileName); // Chỉ thay ảnh nếu người dùng chọn file mới
                 }
-            } catch (Exception e) {
-                req.setAttribute("error", "Giá tiền phải là số hợp lệ!");
-                doGet(req, resp);
-                return;
-            }
-            // --- KẾT THÚC VALIDATION ---
-
-            // 2. Xử lý Upload ảnh
-            String fileName = FileUtil.save(req, "image", "uploads/drinks");
-            if (fileName == null) {
-                // Bạn có thể để ảnh mặc định nếu khách không chọn ảnh
-                fileName = "default.jpg";
             }
 
-            // 3. Tạo đối tượng Entity và set giá trị
-            Drink drink = new Drink();
             drink.setName(name);
             drink.setPrice(price);
             drink.setDescription(desc);
-            drink.setImage(fileName);
-            drink.setActive(true);
+            drink.setActive(active);
 
             Category cat = new Category();
-            cat.setId(Long.parseLong(categoryIdStr));
+            cat.setId(categoryId);
             drink.setCategory(cat);
 
-            // 4. Lưu vào DB
-            drinkService.create(drink);
-
-            // Thành công thì quay về danh sách
-            resp.sendRedirect(req.getContextPath() + "/admin/drinks");
+            if (idStr == null || idStr.isEmpty()) {
+                drinkService.create(drink);
+            } else {
+                drinkService.update(drink);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
-            doGet(req, resp);
         }
+        resp.sendRedirect(req.getContextPath() + "/admin/drinks");
     }
 }

@@ -39,4 +39,42 @@ public class DrinkDAOImpl extends GenericDAOImpl<Drink, Long> implements DrinkDA
             em.close();
         }
     }
-}
+
+        @Override
+        public List<Drink> searchDrinks(String name, Long categoryId, Boolean active, int page, int pageSize) {
+            EntityManager em = JPAUtil.getEntityManager();
+            try {
+                StringBuilder jpql = new StringBuilder("SELECT d FROM Drink d WHERE 1=1");
+                if (name != null && !name.trim().isEmpty()) jpql.append(" AND d.name LIKE :name");
+                if (categoryId != null) jpql.append(" AND d.category.id = :cateId");
+                if (active != null) jpql.append(" AND d.active = :active");
+
+                TypedQuery<Drink> query = em.createQuery(jpql.toString(), Drink.class);
+                if (name != null && !name.trim().isEmpty()) query.setParameter("name", "%" + name + "%");
+                if (categoryId != null) query.setParameter("cateId", categoryId);
+                if (active != null) query.setParameter("active", active);
+
+                query.setFirstResult((page - 1) * pageSize);
+                query.setMaxResults(pageSize);
+                return query.getResultList();
+            } finally { em.close(); }
+        }
+
+        @Override
+        public long countSearch(String name, Long categoryId, Boolean active) {
+            EntityManager em = JPAUtil.getEntityManager();
+            try {
+                StringBuilder jpql = new StringBuilder("SELECT COUNT(d) FROM Drink d WHERE 1=1");
+                if (name != null && !name.trim().isEmpty()) jpql.append(" AND d.name LIKE :name");
+                if (categoryId != null) jpql.append(" AND d.category.id = :cateId");
+                if (active != null) jpql.append(" AND d.active = :active");
+
+                TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
+                if (name != null && !name.trim().isEmpty()) query.setParameter("name", "%" + name + "%");
+                if (categoryId != null) query.setParameter("cateId", categoryId);
+                if (active != null) query.setParameter("active", active);
+                return query.getSingleResult();
+            } finally { em.close(); }
+        }
+    }
+

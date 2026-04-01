@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface BillDetailDAO extends GenericDAO<BillDetail, Long> {
 
-    List<BillDetail> findByBill(Long billId);
+    List<BillDetail> findByBillId(Long billId);
 }

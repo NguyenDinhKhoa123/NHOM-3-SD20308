@@ -15,16 +15,7 @@ public class DrinkServiceImpl implements DrinkService {
     }
 
     @Override
-    public List<Drink> search(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return dao.findAll();
-        }
-        return dao.searchByName(keyword);
-    }
-
-    @Override
     public Drink findById(Long id) {
-        // Gọi hàm findById đã có sẵn trong GenericDAOImpl
         return dao.findById(id);
     }
 
@@ -34,7 +25,28 @@ public class DrinkServiceImpl implements DrinkService {
     }
 
     @Override
+    public void update(Drink drink) {
+        dao.update(drink);
+    }
+
+    @Override
     public void delete(Long id) {
         dao.delete(id);
+    }
+
+    // TRIỂN KHAI TÌM KIẾM & PHÂN TRANG
+    @Override
+    public List<Drink> search(String name, Long categoryId, Boolean active, int page, int pageSize) {
+        // Chuyển trực tiếp dữ liệu xuống DAO để query SQL
+        return dao.searchDrinks(name, categoryId, active, page, pageSize);
+    }
+
+    @Override
+    public int countPages(String name, Long categoryId, Boolean active, int pageSize) {
+        // 1. Hỏi DAO xem tổng cộng có bao nhiêu món thỏa mãn điều kiện lọc
+        long totalRecords = dao.countSearch(name, categoryId, active);
+
+        // 2. Tính toán số trang (Ví dụ: 21 món / 10 món mỗi trang = 2.1 -> làm tròn thành 3 trang)
+        return (int) Math.ceil((double) totalRecords / pageSize);
     }
 }

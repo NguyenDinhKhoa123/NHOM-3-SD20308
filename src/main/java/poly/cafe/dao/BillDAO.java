@@ -15,4 +15,8 @@ public interface BillDAO extends GenericDAO<Bill, Long> {
     void createWithDetail(Bill bill, BillDetail detail);
     double getTotalRevenue();
     long countTotalOrders();
+
+    List<Bill> findAllPaginated(int page, int pageSize);
+
+    long count();
 }

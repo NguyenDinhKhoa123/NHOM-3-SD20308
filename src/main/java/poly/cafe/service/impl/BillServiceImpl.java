@@ -18,9 +18,9 @@ public class BillServiceImpl implements BillService {
     @Override
     public void updateStatus(Long id, String status) {
         Bill bill = billDAO.findById(id);
-        // Dùng equalsIgnoreCase để tránh lỗi hoa thường
-        if (bill != null && bill.getStatus().trim().equalsIgnoreCase("pending")) {
-            bill.setStatus(status);
+        if (bill != null) {
+            // Cho phép cập nhật thoải mái mọi trạng thái (pending -> confirmed -> paid)
+            bill.setStatus(status.trim());
             billDAO.update(bill);
         }
     }
@@ -67,5 +67,27 @@ public class BillServiceImpl implements BillService {
 
             detailDAO.create(detail);
         }
+    }
+
+    @Override
+    public Bill findById(Long id) { return billDAO.findById(id); }
+
+    @Override
+    public void update(Bill bill) { billDAO.update(bill); }
+
+    @Override
+    public List<BillDetail> findDetailsByBillId(Long billId) {
+        return detailDAO.findByBillId(billId); // Gọi xuống DetailDAO
+    }
+
+    @Override
+    public List<Bill> getBills(int page, int pageSize) {
+        return billDAO.findAllPaginated(page, pageSize);
+    }
+
+    @Override
+    public int countBillPages(int pageSize) {
+        long total = billDAO.count();
+        return (int) Math.ceil((double) total / pageSize);
     }
 }
