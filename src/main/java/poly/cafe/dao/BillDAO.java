@@ -19,4 +19,8 @@ public interface BillDAO extends GenericDAO<Bill, Long> {
     List<Bill> findAllPaginated(int page, int pageSize);
 
     long count();
+
+    List<Bill> findByStatuses(int page, int size, List<String> statuses);
+
+    long countByStatuses(List<String> statuses);
 }

@@ -19,6 +19,10 @@ public interface BillService {
 
     List<Bill> findAll();
 
+    List<Bill> getBillsByStatus(int page, int pageSize, boolean isHistory);
+
+    int countBillsByStatus(int pageSize, boolean isHistory);
+
     // BỔ SUNG CHO BÀI 1
     Bill findById(Long id);
     void update(Bill bill);

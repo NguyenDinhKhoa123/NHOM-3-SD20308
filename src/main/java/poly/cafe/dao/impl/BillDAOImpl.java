@@ -121,4 +121,36 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
             em.close();
         }
     }
+
+    @Override
+    public List<Bill> findByStatuses(int page, int size, List<String> statuses) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT b FROM Bill b WHERE b.status IN :statuses ORDER BY b.createDate DESC",
+                            Bill.class
+                    )
+                    .setParameter("statuses", statuses)
+                    .setFirstResult((page - 1) * size)
+                    .setMaxResults(size)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public long countByStatuses(List<String> statuses) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT COUNT(b) FROM Bill b WHERE b.status IN :statuses",
+                            Long.class
+                    )
+                    .setParameter("statuses", statuses)
+                    .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
 }

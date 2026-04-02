@@ -70,6 +70,30 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
+    public List<Bill> getBillsByStatus(int page, int pageSize, boolean isHistory) {
+        if (isHistory) {
+            return billDAO.findByStatuses(page, pageSize,
+                    List.of("paid", "cancelled", "canceled"));
+        } else {
+            return billDAO.findByStatuses(page, pageSize,
+                    List.of("pending", "confirmed"));
+        }
+    }
+
+    @Override
+    public int countBillsByStatus(int pageSize, boolean isHistory) {
+        long total;
+        if (isHistory) {
+            total = billDAO.countByStatuses(
+                    List.of("paid", "cancelled", "canceled"));
+        } else {
+            total = billDAO.countByStatuses(
+                    List.of("pending", "confirmed"));
+        }
+        return (int) Math.ceil((double) total / pageSize);
+    }
+
+    @Override
     public Bill findById(Long id) { return billDAO.findById(id); }
 
     @Override

@@ -28,74 +28,84 @@
                         </tr>
                     </thead>
                     <tbody>
+
                         <c:if test="${not empty orders}">
                             <c:forEach var="b" items="${orders}">
                                 <c:set var="stt" value="${b.status.trim()}"/>
-                                <c:if test="${(isHistory  && (stt == 'paid' || stt == 'canceled' || stt == 'cancelled')) ||
-                                             (!isHistory && (stt == 'pending' || stt == 'confirmed'))}">
-                                    <tr>
-                                        <td class="ps-3 fw-bold" style="color: #27ae60;">${b.code}</td>
-                                        <td>
-                                            <fmt:parseDate value="${b.createDate}"
-                                                           pattern="yyyy-MM-dd'T'HH:mm"
-                                                           var="parsedDate" type="both"/>
-                                            <fmt:formatDate value="${parsedDate}" pattern="dd/MM/yyyy HH:mm"/>
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold">${b.user.fullname}</div>
-                                            <small style="color: #7f8c8d;">${b.user.email}</small>
-                                        </td>
-                                        <td class="fw-bold" style="color: #e74c3c;">
-                                            <fmt:formatNumber value="${b.total}" type="number"/> VNĐ
-                                        </td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${stt == 'pending'}">
-                                                    <span class="badge px-3"
-                                                          style="background: #f39c12;">Chờ xác nhận</span>
-                                                </c:when>
-                                                <c:when test="${stt == 'confirmed'}">
-                                                    <span class="badge bg-info px-3">Đã xác nhận</span>
-                                                </c:when>
-                                                <c:when test="${stt == 'paid'}">
-                                                    <span class="badge px-3"
-                                                          style="background: #27ae60;">Đã thanh toán</span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="badge bg-secondary px-3">Đã hủy</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="${pageContext.request.contextPath}/admin/orders/detail?id=${b.id}"
-                                               class="btn btn-sm btn-outline-secondary">Chi tiết</a>
 
-                                            <c:if test="${!isHistory}">
-                                                <c:if test="${stt == 'pending'}">
-                                                    <a href="${pageContext.request.contextPath}/admin/orders/update?id=${b.id}&status=confirmed"
-                                                       class="btn btn-sm text-white"
-                                                       style="background: #2c3e50;"
-                                                       onclick="return confirm('Xác nhận đơn hàng này?')">
-                                                        Xác nhận
-                                                    </a>
-                                                    <a href="${pageContext.request.contextPath}/admin/orders/cancel?id=${b.id}"
-                                                       class="btn btn-sm btn-outline-danger"
-                                                       onclick="return confirm('Hủy đơn?')">Hủy</a>
-                                                </c:if>
-                                                <c:if test="${stt == 'confirmed'}">
-                                                    <a href="${pageContext.request.contextPath}/admin/orders/update?id=${b.id}&status=paid"
-                                                       class="btn btn-sm text-white"
-                                                       style="background: #27ae60;"
-                                                       onclick="return confirm('Khách đã thanh toán đơn này?')">
-                                                        Thanh toán
-                                                    </a>
-                                                </c:if>
+                                <tr>
+                                    <td class="ps-3 fw-bold" style="color: #27ae60;">${b.code}</td>
+
+                                    <td>
+                                        <fmt:parseDate value="${b.createDate}"
+                                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                                       var="parsedDate" type="both"/>
+                                        <fmt:formatDate value="${parsedDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-bold">${b.user.fullname}</div>
+                                        <small style="color: #7f8c8d;">${b.user.email}</small>
+                                    </td>
+
+                                    <td class="fw-bold" style="color: #e74c3c;">
+                                        <fmt:formatNumber value="${b.total}" type="number"/> VNĐ
+                                    </td>
+
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${stt == 'pending'}">
+                                                <span class="badge px-3"
+                                                      style="background: #f39c12;">Chờ xác nhận</span>
+                                            </c:when>
+                                            <c:when test="${stt == 'confirmed'}">
+                                                <span class="badge bg-info px-3">Đã xác nhận</span>
+                                            </c:when>
+                                            <c:when test="${stt == 'paid'}">
+                                                <span class="badge px-3"
+                                                      style="background: #27ae60;">Đã thanh toán</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge bg-secondary px-3">Đã hủy</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a href="${pageContext.request.contextPath}/admin/orders/detail?id=${b.id}"
+                                           class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+
+                                        <c:if test="${!isHistory}">
+                                            <c:if test="${stt == 'pending'}">
+                                                <a href="${pageContext.request.contextPath}/admin/orders/update?id=${b.id}&status=confirmed"
+                                                   class="btn btn-sm text-white"
+                                                   style="background: #2c3e50;"
+                                                   onclick="return confirm('Xác nhận đơn hàng này?')">
+                                                    Xác nhận
+                                                </a>
+
+                                                <a href="${pageContext.request.contextPath}/admin/orders/cancel?id=${b.id}"
+                                                   class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Hủy đơn?')">
+                                                    Hủy
+                                                </a>
                                             </c:if>
-                                        </td>
-                                    </tr>
-                                </c:if>
+
+                                            <c:if test="${stt == 'confirmed'}">
+                                                <a href="${pageContext.request.contextPath}/admin/orders/update?id=${b.id}&status=paid"
+                                                   class="btn btn-sm text-white"
+                                                   style="background: #27ae60;"
+                                                   onclick="return confirm('Khách đã thanh toán đơn này?')">
+                                                    Thanh toán
+                                                </a>
+                                            </c:if>
+                                        </c:if>
+                                    </td>
+                                </tr>
+
                             </c:forEach>
                         </c:if>
+
                     </tbody>
                 </table>
             </div>
@@ -118,5 +128,6 @@
                 </nav>
             </div>
         </c:if>
+
     </div>
 </div>
