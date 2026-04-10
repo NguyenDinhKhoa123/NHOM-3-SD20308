@@ -2,6 +2,7 @@ package poly.cafe.service;
 
 import poly.cafe.entity.Bill;
 import poly.cafe.entity.BillDetail;
+import poly.cafe.entity.User;
 import poly.cafe.model.CartItem;
 
 import java.util.List;
@@ -19,14 +20,13 @@ public interface BillService {
 
     List<Bill> findAll();
 
-    List<Bill> getBillsByStatus(int page, int pageSize, boolean isHistory);
-
-    int countBillsByStatus(int pageSize, boolean isHistory);
-
-    // BỔ SUNG CHO BÀI 1
     Bill findById(Long id);
     void update(Bill bill);
     List<BillDetail> findDetailsByBillId(Long billId);
     List<Bill> getBills(int page, int pageSize);
     int countBillPages(int pageSize);
+
+    List<Bill> getBillsForManagement(poly.cafe.entity.User currentUser, int page, int pageSize, boolean isHistory);
+
+    int countBillsForManagement(poly.cafe.entity.User currentUser, int pageSize, boolean isHistory);
 }

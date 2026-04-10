@@ -7,28 +7,30 @@ import poly.cafe.dao.impl.BillDetailDAOImpl;
 import poly.cafe.entity.Bill;
 import poly.cafe.entity.BillDetail;
 import poly.cafe.entity.Drink;
+import poly.cafe.entity.User;
 import poly.cafe.model.CartItem;
 import poly.cafe.service.BillService;
 import java.util.List;
 import java.util.Map;
 
 public class BillServiceImpl implements BillService {
-    private BillDAO billDAO = new BillDAOImpl();
-    private BillDetailDAO detailDAO = new BillDetailDAOImpl();
+
+    private final BillDAO billDAO = new BillDAOImpl();
+    private final BillDetailDAO detailDAO = new BillDetailDAOImpl();
+
     @Override
     public void updateStatus(Long id, String status) {
         Bill bill = billDAO.findById(id);
         if (bill != null) {
-            // Cho phép cập nhật thoải mái mọi trạng thái (pending -> confirmed -> paid)
             bill.setStatus(status.trim());
             billDAO.update(bill);
         }
     }
+
     @Override
     public boolean cancelOrder(Long billId, Long userId) {
         Bill bill = billDAO.findById(billId);
         if (bill != null && bill.getUser().getId().equals(userId)) {
-            // Thay vì update status, ta gọi lệnh delete
             billDAO.delete(billId);
             return true;
         }
@@ -44,17 +46,15 @@ public class BillServiceImpl implements BillService {
     public void createWithDetail(Bill bill, BillDetail detail) {
         billDAO.createWithDetail(bill, detail);
     }
+
     @Override
     public List<Bill> findAll() {
-        // Chúng ta nên dùng một câu JPQL riêng để sắp xếp đơn mới nhất lên đầu
         return billDAO.findAll();
     }
+
     @Override
     public void checkout(Bill bill, Map<Long, CartItem> cart) {
-        // 1. Lưu hóa đơn chính trước để lấy ID
         billDAO.create(bill);
-
-        // 2. Duyệt giỏ hàng để lưu từng chi tiết hóa đơn
         for (CartItem item : cart.values()) {
             BillDetail detail = new BillDetail();
             detail.setBill(bill);
@@ -70,38 +70,35 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
-    public List<Bill> getBillsByStatus(int page, int pageSize, boolean isHistory) {
-        if (isHistory) {
-            return billDAO.findByStatuses(page, pageSize,
-                    List.of("paid", "cancelled", "canceled"));
-        } else {
-            return billDAO.findByStatuses(page, pageSize,
-                    List.of("pending", "confirmed"));
-        }
+    public List<Bill> getBillsForManagement(User currentUser, int page, int pageSize, boolean isHistory) {
+        List<String> statuses = isHistory
+                ? List.of("paid", "cancelled", "canceled")
+                : List.of("pending", "confirmed");
+        return billDAO.findBillsForManagement(currentUser, statuses, page, pageSize);
     }
 
     @Override
-    public int countBillsByStatus(int pageSize, boolean isHistory) {
-        long total;
-        if (isHistory) {
-            total = billDAO.countByStatuses(
-                    List.of("paid", "cancelled", "canceled"));
-        } else {
-            total = billDAO.countByStatuses(
-                    List.of("pending", "confirmed"));
-        }
+    public int countBillsForManagement(User currentUser, int pageSize, boolean isHistory) {
+        List<String> statuses = isHistory
+                ? List.of("paid", "cancelled", "canceled")
+                : List.of("pending", "confirmed");
+        long total = billDAO.countBillsForManagement(currentUser, statuses);
         return (int) Math.ceil((double) total / pageSize);
     }
 
     @Override
-    public Bill findById(Long id) { return billDAO.findById(id); }
+    public Bill findById(Long id) {
+        return billDAO.findById(id);
+    }
 
     @Override
-    public void update(Bill bill) { billDAO.update(bill); }
+    public void update(Bill bill) {
+        billDAO.update(bill);
+    }
 
     @Override
     public List<BillDetail> findDetailsByBillId(Long billId) {
-        return detailDAO.findByBillId(billId); // Gọi xuống DetailDAO
+        return detailDAO.findByBillId(billId);
     }
 
     @Override

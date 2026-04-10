@@ -12,7 +12,8 @@ public class StatisticDAOImpl {
             String sql = "SELECT TOP 5 d.name, SUM(bd.quantity) FROM bill_details bd " +
                     "JOIN bills b ON bd.bill_id = b.id " +
                     "JOIN drinks d ON bd.drink_id = d.id " +
-                    "WHERE b.status = 'paid' AND b.create_date BETWEEN ?1 AND ?2 " +
+                    "WHERE b.status LIKE '%paid%' " +
+                    "AND CAST(b.create_date AS DATE) BETWEEN ?1 AND ?2 " +
                     "GROUP BY d.name ORDER BY SUM(bd.quantity) DESC";
             return em.createNativeQuery(sql)
                     .setParameter(1, start)
@@ -27,7 +28,8 @@ public class StatisticDAOImpl {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             String sql = "SELECT CAST(create_date AS DATE), SUM(total) FROM bills " +
-                    "WHERE status = 'paid' AND create_date BETWEEN ?1 AND ?2 " +
+                    "WHERE status LIKE '%paid%' " +
+                    "AND CAST(create_date AS DATE) BETWEEN ?1 AND ?2 " +
                     "GROUP BY CAST(create_date AS DATE) ORDER BY 1";
             return em.createNativeQuery(sql)
                     .setParameter(1, start)

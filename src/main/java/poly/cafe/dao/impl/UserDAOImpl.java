@@ -7,6 +7,8 @@ import poly.cafe.utils.JPAUtil;
 import java.util.List;
 
 public class UserDAOImpl extends GenericDAOImpl<User, Long> implements UserDAO {
+
+
     public UserDAOImpl() {
         super(User.class);
     }

@@ -20,7 +20,7 @@ public interface BillDAO extends GenericDAO<Bill, Long> {
 
     long count();
 
-    List<Bill> findByStatuses(int page, int size, List<String> statuses);
+    List<Bill> findBillsForManagement(poly.cafe.entity.User currentUser, List<String> statuses, int page, int pageSize);
 
-    long countByStatuses(List<String> statuses);
+    long countBillsForManagement(poly.cafe.entity.User currentUser, List<String> statuses);
 }

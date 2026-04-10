@@ -5,6 +5,7 @@ import jakarta.persistence.TypedQuery;
 import poly.cafe.dao.BillDAO;
 import poly.cafe.entity.Bill;
 import poly.cafe.entity.BillDetail;
+import poly.cafe.entity.User;
 import poly.cafe.utils.JPAUtil;
 import java.util.List;
 
@@ -21,9 +22,9 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
             String jpql = "SELECT b FROM Bill b WHERE b.user.id = :uid " +
                     "AND b.status NOT IN ('cancelled') " +
                     "ORDER BY b.createDate DESC";
-            TypedQuery<Bill> query = em.createQuery(jpql, Bill.class);
-            query.setParameter("uid", userId);
-            return query.getResultList();
+            return em.createQuery(jpql, Bill.class)
+                    .setParameter("uid", userId)
+                    .getResultList();
         } finally {
             em.close();
         }
@@ -33,10 +34,10 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
     public Bill findByCode(String code) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            String jpql = "SELECT b FROM Bill b WHERE b.code = :code";
-            TypedQuery<Bill> query = em.createQuery(jpql, Bill.class);
-            query.setParameter("code", code);
-            List<Bill> list = query.getResultList();
+            List<Bill> list = em.createQuery(
+                            "SELECT b FROM Bill b WHERE b.code = :code", Bill.class)
+                    .setParameter("code", code)
+                    .getResultList();
             return list.isEmpty() ? null : list.get(0);
         } finally {
             em.close();
@@ -47,8 +48,9 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
     public double getTotalRevenue() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            String jpql = "SELECT SUM(b.total) FROM Bill b WHERE b.status = 'paid'";
-            Double result = em.createQuery(jpql, Double.class).getSingleResult();
+            Double result = em.createQuery(
+                            "SELECT SUM(b.total) FROM Bill b WHERE b.status = 'paid'", Double.class)
+                    .getSingleResult();
             return result != null ? result : 0.0;
         } finally {
             em.close();
@@ -59,7 +61,8 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
     public long countTotalOrders() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT COUNT(b) FROM Bill b", Long.class).getSingleResult();
+            return em.createQuery("SELECT COUNT(b) FROM Bill b", Long.class)
+                    .getSingleResult();
         } finally {
             em.close();
         }
@@ -89,9 +92,7 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
             em.merge(bill);
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             e.printStackTrace();
         } finally {
             em.close();
@@ -102,11 +103,11 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
     public List<Bill> findAllPaginated(int page, int pageSize) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            String jpql = "SELECT b FROM Bill b ORDER BY b.createDate DESC";
-            TypedQuery<Bill> query = em.createQuery(jpql, Bill.class);
-            query.setFirstResult((page - 1) * pageSize);
-            query.setMaxResults(pageSize);
-            return query.getResultList();
+            return em.createQuery(
+                            "SELECT b FROM Bill b ORDER BY b.createDate DESC", Bill.class)
+                    .setFirstResult((page - 1) * pageSize)
+                    .setMaxResults(pageSize)
+                    .getResultList();
         } finally {
             em.close();
         }
@@ -116,39 +117,47 @@ public class BillDAOImpl extends GenericDAOImpl<Bill, Long> implements BillDAO {
     public long count() {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT COUNT(b) FROM Bill b", Long.class).getSingleResult();
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public List<Bill> findByStatuses(int page, int size, List<String> statuses) {
-        EntityManager em = JPAUtil.getEntityManager();
-        try {
-            return em.createQuery(
-                            "SELECT b FROM Bill b WHERE b.status IN :statuses ORDER BY b.createDate DESC",
-                            Bill.class
-                    )
-                    .setParameter("statuses", statuses)
-                    .setFirstResult((page - 1) * size)
-                    .setMaxResults(size)
-                    .getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    @Override
-    public long countByStatuses(List<String> statuses) {
-        EntityManager em = JPAUtil.getEntityManager();
-        try {
-            return em.createQuery(
-                            "SELECT COUNT(b) FROM Bill b WHERE b.status IN :statuses",
-                            Long.class
-                    )
-                    .setParameter("statuses", statuses)
+            return em.createQuery("SELECT COUNT(b) FROM Bill b", Long.class)
                     .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Bill> findBillsForManagement(User currentUser, List<String> statuses, int page, int pageSize) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            boolean isStaff = "staff".equalsIgnoreCase(currentUser.getRole());
+            String jpql = "SELECT b FROM Bill b WHERE b.status IN :statuses"
+                    + (isStaff ? " AND b.user.id = :uid" : "")
+                    + " ORDER BY b.createDate DESC";
+
+            TypedQuery<Bill> query = em.createQuery(jpql, Bill.class)
+                    .setParameter("statuses", statuses)
+                    .setFirstResult((page - 1) * pageSize)
+                    .setMaxResults(pageSize);
+
+            if (isStaff) query.setParameter("uid", currentUser.getId());
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public long countBillsForManagement(User currentUser, List<String> statuses) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            boolean isStaff = "staff".equalsIgnoreCase(currentUser.getRole());
+            String jpql = "SELECT COUNT(b) FROM Bill b WHERE b.status IN :statuses"
+                    + (isStaff ? " AND b.user.id = :uid" : "");
+
+            TypedQuery<Long> query = em.createQuery(jpql, Long.class)
+                    .setParameter("statuses", statuses);
+
+            if (isStaff) query.setParameter("uid", currentUser.getId());
+            return query.getSingleResult();
         } finally {
             em.close();
         }

@@ -16,7 +16,7 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
                 <li class="nav-item">
                     <a class="nav-link text-white"
                        href="${pageContext.request.contextPath}/home">Trang chủ</a>
@@ -25,17 +25,29 @@
                     <a class="nav-link text-white"
                        href="${pageContext.request.contextPath}/drinks">Thực đơn</a>
                 </li>
+                <li class="nav-item border-start border-light ms-2 ps-2">
+                    <a class="nav-link text-white d-flex align-items-center"
+                       href="${pageContext.request.contextPath}/cart">
+                        Giỏ hàng
+                        <c:if test="${not empty sessionScope.cart}">
+                            <span class="badge rounded-pill ms-1"
+                                  style="background-color: #eafaf1; color: #219150; font-size: 0.72rem;">
+                                ${sessionScope.cart.size()}
+                            </span>
+                        </c:if>
+                    </a>
+                </li>
 
                 <c:if test="${not empty sessionScope.user}">
-                    <li class="nav-item border-start ms-2 ps-2">
+                    <li class="nav-item border-start border-light ms-2 ps-2">
                         <a class="nav-link text-white"
                            href="${pageContext.request.contextPath}/my-orders">Đơn của tôi</a>
                     </li>
                 </c:if>
 
                 <c:if test="${sessionScope.user.role == 'admin' || sessionScope.user.role == 'staff'}">
-                    <li class="nav-item dropdown ms-lg-3">
-                        <a class="nav-link dropdown-toggle fw-bold text-white" href="#"
+                    <li class="nav-item dropdown border-start border-light ms-2 ps-2">
+                        <a class="nav-link dropdown-toggle text-white fw-bold" href="#"
                            id="adminDropdown" role="button" data-bs-toggle="dropdown">
                             Quản trị
                         </a>
@@ -82,7 +94,7 @@
                 <c:choose>
                     <c:when test="${empty sessionScope.user}">
                         <a href="${pageContext.request.contextPath}/login"
-                           class="btn btn-outline-light btn-sm px-4 rounded-pill">
+                           class="btn btn-outline-light btn-sm px-4 rounded-pill fw-bold">
                             Đăng nhập
                         </a>
                     </c:when>
