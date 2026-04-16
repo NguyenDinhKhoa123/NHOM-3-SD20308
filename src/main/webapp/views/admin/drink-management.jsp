@@ -29,7 +29,7 @@
                             <div class="col-6">
                                 <label class="form-label small fw-bold" style="color: #7f8c8d;">Giá (VNĐ)</label>
                                 <input type="number" name="price" class="form-control"
-                                       value="${drinkForm.price}" required>
+                                       value="${drinkForm.price}" required min="0" step="1000">
                             </div>
                             <div class="col-6">
                                 <label class="form-label small fw-bold" style="color: #7f8c8d;">Danh mục</label>

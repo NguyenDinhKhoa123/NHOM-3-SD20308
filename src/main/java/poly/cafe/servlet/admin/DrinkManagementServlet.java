@@ -80,7 +80,7 @@ public class DrinkManagementServlet extends HttpServlet {
             boolean isNew = (idStr == null || idStr.isEmpty());
             Drink drink = isNew ? new Drink() : drinkService.findById(Long.parseLong(idStr));
 
-            String fileName = FileUtil.save(req, "image", "uploads/drinks");
+            String fileName = FileUtil.save(req, "image", "uploads");
             if (isNew) {
                 drink.setImage(fileName != null ? fileName : "default.jpg");
             } else if (fileName != null) {

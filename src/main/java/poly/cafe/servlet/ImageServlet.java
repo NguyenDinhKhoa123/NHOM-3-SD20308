@@ -22,8 +22,16 @@ public class ImageServlet extends HttpServlet {
             return;
         }
 
+        // BƯỚC QUAN TRỌNG: Sửa đường dẫn để khớp với thư mục mà FileUtil đang lưu vào
         String uploadPath = getServletContext().getRealPath("/uploads");
+
+        // Nếu bạn muốn ImageServlet đọc được cả ảnh trong thư mục "images" mặc định của project:
         File file = new File(uploadPath, imageName);
+        if (!file.exists()) {
+            // Thử tìm trong thư mục gốc /uploads nếu không thấy trong /uploads/drinks
+            uploadPath = getServletContext().getRealPath("/uploads");
+            file = new File(uploadPath, imageName);
+        }
 
         if (!file.exists()) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
